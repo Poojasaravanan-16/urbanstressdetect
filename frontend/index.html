@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Urban Micro-Stress Predictor</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #0d1117; color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; }
+      input[type=range] { height: 4px; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes fadeIn { from { opacity:0; transform:translateY(16px);} to { opacity:1; transform:translateY(0);} }
+      ::-webkit-scrollbar { width: 6px; } 
+      ::-webkit-scrollbar-track { background: #161b22; }
+      ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
