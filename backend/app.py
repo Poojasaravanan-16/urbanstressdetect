@@ -8,8 +8,6 @@ from supabase_config import SupabaseManager
 
 # Make custom classes resolvable by pickle
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from ml_pipeline_urban import (SVMClassifier, WeightedRegression,
-    ClusteringClassifier, DecisionTreeRuleLearner, RuleBasedClassifier)
 
 app = Flask(__name__)
 CORS(app)

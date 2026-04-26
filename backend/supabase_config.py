@@ -1,7 +1,6 @@
 import os
 from supabase import create_client, Client
 from datetime import datetime, timezone
-import json
 from dotenv import load_dotenv
 
 # Load environment variables

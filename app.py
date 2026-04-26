@@ -5,6 +5,8 @@ import joblib
 import os
 
 # Required so joblib can deserialise the custom model classes
+from ml_pipeline_urban import (SVMClassifier, WeightedRegression,
+    ClusteringClassifier, DecisionTreeRuleLearner, RuleBasedClassifier)
 
 # ── Load model bundle ──────────────────────────────────────────────────
 if not os.path.exists("best_model.pkl"):
