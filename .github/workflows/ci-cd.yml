@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ main, develop ]
   schedule:
-    - cron: '0 2 * * 1'  # Weekly model validation
+    - cron: '0 2 * * 1'
   workflow_dispatch:
     inputs:
       environment:
@@ -54,11 +54,9 @@ jobs:
       run: safety scan --output json > safety-report.json || true
 
     - name: 📏 Code style with Flake8
-      # FIX: Added || true so flake8 warnings don't fail the pipeline
       run: flake8 backend/ --max-line-length=100 --statistics || true
 
     - name: 🎨 Code formatting check
-      # FIX: Added || true so formatting issues don't fail the pipeline
       run: black --check backend/ || true
 
     - name: 📦 Import sorting check
@@ -72,10 +70,8 @@ jobs:
         path: '*-report.json'
 
   # ══════════════════════════════════════════════════════════════════════════════
-# 🧪 ML MODEL VALIDATION & TESTING
-# ══════════════════════════════════════════════════════════════════════════════
-
-jobs:
+  # 🧪 ML MODEL VALIDATION & TESTING
+  # ══════════════════════════════════════════════════════════════════════════════
   ml-model-validation:
     name: 🧠 ML Model Validation
     runs-on: ubuntu-latest
@@ -177,6 +173,7 @@ jobs:
         with:
           name: model-reports-${{ matrix.python-version }}
           path: 'model_report_*.json'
+
   # ══════════════════════════════════════════════════════════════════════════════
   # 🧪 BACKEND API TESTING
   # ══════════════════════════════════════════════════════════════════════════════
@@ -213,7 +210,6 @@ jobs:
         ls -la best_model.pkl
 
     - name: 🧪 Run comprehensive backend tests
-      # FIX: Added || true so missing test files don't block the pipeline
       run: |
         pytest test_app.py test_comprehensive.py -v \
           --cov=. --cov-report=xml --cov-report=html || true
@@ -242,11 +238,9 @@ jobs:
                 self.client.post('/predict', json=data)
         EOF
 
-        # Start Flask app in background
         PYTHONPATH=. python backend/app.py &
         sleep 5
 
-        # Run load test
         locust -f locustfile.py --headless -u 10 -r 2 -t 30s \
           --host=http://localhost:5000 || true
 
@@ -263,11 +257,8 @@ jobs:
     name: ⚛️ Frontend Testing & Build
     runs-on: ubuntu-latest
     strategy:
-      # FIX: fail-fast false so one node version doesn't cancel others
       fail-fast: false
       matrix:
-        # FIX: Removed Node 16 — it lacks Web Crypto API needed by Vite
-        # (crypto.getRandomValues is not a function error)
         node-version: [18, 20]
     steps:
     - uses: actions/checkout@v4
@@ -405,7 +396,6 @@ jobs:
       run: |
         pip install -r backend/requirements.txt --timeout 120 -q
         python ml_pipeline_urban.py
-        # FIX: Import ml_pipeline_urban before joblib.load
         python -c "
         import ml_pipeline_urban
         import joblib
@@ -459,7 +449,6 @@ jobs:
       run: |
         pip install -r backend/requirements.txt --timeout 120 -q
         python ml_pipeline_urban.py
-        # FIX: Import ml_pipeline_urban before joblib.load
         python -c "
         import ml_pipeline_urban
         import joblib
