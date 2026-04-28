@@ -373,7 +373,7 @@ jobs:
     name: 🚀 Deploy to Staging
     runs-on: ubuntu-latest
     needs: [code-quality, ml-model-validation, backend-testing, frontend-testing, docker-build]
-    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging' || github.event.inputs.environment == 'production'
     environment:
       name: staging
       url: https://urban-stress-staging.example.com
@@ -416,7 +416,7 @@ jobs:
     name: 🌟 Deploy to Production
     runs-on: ubuntu-latest
     needs: [deploy-staging]
-    if: (github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production') && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
     environment:
       name: production
       url: https://urban-stress.example.com
