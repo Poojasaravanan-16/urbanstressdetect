@@ -72,111 +72,109 @@ jobs:
         path: '*-report.json'
 
   # ══════════════════════════════════════════════════════════════════════════════
-  # 🧪 ML MODEL VALIDATION & TESTING
-  # ══════════════════════════════════════════════════════════════════════════════
-  ml-model-validation:
-    name: 🧠 ML Model Validation
-    runs-on: ubuntu-latest
-    strategy:
-      # FIX: fail-fast false so one python version failing doesn't cancel others
-      fail-fast: false
-      matrix:
-        # FIX: Removed 3.8 — joblib pickle compatibility issues with custom classes
-        python-version: ['3.9', '3.10']
-    steps:
-    - uses: actions/checkout@v4
+# 🧪 ML MODEL VALIDATION & TESTING
+# ══════════════════════════════════════════════════════════════════════════════
+ml-model-validation:
+  name: 🧠 ML Model Validation
+  runs-on: ubuntu-latest
+  strategy:
+    fail-fast: false
+    matrix:
+      python-version: ['3.9', '3.10']
+  steps:
+  - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+  - name: Set up Python ${{ matrix.python-version }}
+    uses: actions/setup-python@v4
+    with:
+      python-version: ${{ matrix.python-version }}
 
-    - name: Cache ML dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-ml-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+  - name: Cache ML dependencies
+    uses: actions/cache@v3
+    with:
+      path: ~/.cache/pip
+      key: ${{ runner.os }}-pip-ml-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
 
-    - name: Install ML dependencies
-      # FIX: Removed evidently and great-expectations — they cause timeout during build
-      run: |
-        pip install -r backend/requirements.txt --timeout 120
-        pip install pytest pytest-cov mlflow
+  - name: Install ML dependencies
+    run: |
+      pip install -r backend/requirements.txt --timeout 120
+      pip install pytest pytest-cov mlflow
 
-    - name: 🔬 Generate ML model
-      run: |
-        echo "Generating ML model..."
-        python ml_pipeline_urban.py
-        ls -la best_model.pkl
+  - name: 🔬 Generate ML model
+    run: |
+      echo "Generating ML model..."
+      python ml_pipeline_urban.py
+      ls -la best_model.pkl
 
-    - name: 🧪 Model performance validation
-      run: |
-        python -c "
-        # FIX: Import ml_pipeline_urban FIRST so joblib can find custom classes
-        # (SVMClassifier, WeightedRegression, etc.) when unpickling the model
-        import ml_pipeline_urban
-        import joblib
-        import numpy as np
+  - name: 🧪 Model performance validation
+    run: |
+      python - <<'EOF'
+      import sys
+      sys.path.insert(0, '.')          # ✅ FIX: ensures local module is found
+      import ml_pipeline_urban         # ✅ registers SVMClassifier, WeightedRegression
+      import joblib
+      import numpy as np
 
-        bundle = joblib.load('best_model.pkl')
-        model = bundle['model']
-        accuracy = bundle['accuracy']
+      bundle = joblib.load('best_model.pkl')
+      model = bundle['model']
+      accuracy = bundle['accuracy']
 
-        print(f'Model: {bundle[\"model_name\"]}')
-        print(f'Accuracy: {accuracy:.4f}')
+      print(f'Model: {bundle["model_name"]}')
+      print(f'Accuracy: {accuracy:.4f}')
 
-        assert accuracy > 0.7, f'Model accuracy {accuracy:.4f} below threshold 0.7'
-        print('✅ Model validation passed!')
-        "
+      assert accuracy > 0.7, f'Model accuracy {accuracy:.4f} below threshold 0.7'
+      print('✅ Model validation passed!')
+      EOF
 
-    - name: 🎯 Model inference testing
-      run: |
-        python -c "
-        # FIX: Import ml_pipeline_urban FIRST to register custom classes
-        import ml_pipeline_urban
-        import joblib
-        import numpy as np
+  - name: 🎯 Model inference testing
+    run: |
+      python - <<'EOF'
+      import sys
+      sys.path.insert(0, '.')          # ✅ FIX
+      import ml_pipeline_urban
+      import joblib
+      import numpy as np
 
-        bundle = joblib.load('best_model.pkl')
-        model = bundle['model']
-        scaler = bundle['scaler']
+      bundle = joblib.load('best_model.pkl')
+      model = bundle['model']
+      scaler = bundle['scaler']
 
-        test_data = np.array([[35.0, 5.0, 58.0, 2.0, 10.0, 1.0, 10.0]])
-        scaled_data = scaler.transform(test_data)
-        prediction = model.predict(scaled_data)
+      test_data = np.array([[35.0, 5.0, 58.0, 2.0, 10.0, 1.0, 10.0]])
+      scaled_data = scaler.transform(test_data)
+      prediction = model.predict(scaled_data)
 
-        assert prediction[0] in [0, 1, 2], 'Invalid prediction output'
-        print(f'✅ Model inference test passed! Prediction: {prediction[0]}')
-        "
+      assert prediction[0] in [0, 1, 2], 'Invalid prediction output'
+      print(f'✅ Model inference test passed! Prediction: {prediction[0]}')
+      EOF
 
-    - name: Generate model report
-      run: |
-        python -c "
-        # FIX: Import ml_pipeline_urban FIRST to register custom classes
-        import ml_pipeline_urban
-        import joblib
-        import json
+  - name: Generate model report
+    run: |
+      python - <<'EOF'
+      import sys
+      sys.path.insert(0, '.')          # ✅ FIX
+      import ml_pipeline_urban
+      import joblib
+      import json
 
-        bundle = joblib.load('best_model.pkl')
-        report = {
-            'model_name': bundle['model_name'],
-            'accuracy': float(bundle['accuracy']),
-            'python_version': '${{ matrix.python-version }}',
-            'validation_status': 'passed'
-        }
+      bundle = joblib.load('best_model.pkl')
+      report = {
+          'model_name': bundle['model_name'],
+          'accuracy': float(bundle['accuracy']),
+          'python_version': '${{ matrix.python-version }}',
+          'validation_status': 'passed'
+      }
 
-        with open('model_report_${{ matrix.python-version }}.json', 'w') as f:
-            json.dump(report, f, indent=2)
+      with open('model_report_${{ matrix.python-version }}.json', 'w') as f:
+          json.dump(report, f, indent=2)
 
-        print('✅ Model report generated!')
-        "
+      print('✅ Model report generated!')
+      EOF
 
-    - name: Upload model reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: model-reports-${{ matrix.python-version }}
-        path: 'model_report_*.json'
-
+  - name: Upload model reports
+    uses: actions/upload-artifact@v4
+    with:
+      name: model-reports-${{ matrix.python-version }}
+      path: 'model_report_*.json'
   # ══════════════════════════════════════════════════════════════════════════════
   # 🧪 BACKEND API TESTING
   # ══════════════════════════════════════════════════════════════════════════════
