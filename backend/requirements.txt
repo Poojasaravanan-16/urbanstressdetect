@@ -5,16 +5,5 @@ numpy
 pandas
 matplotlib
 scikit-learn
-pytest
-pytest-cov
-pytest-mock
-requests-mock
-bandit
-safety
-flake8
-black
-isort
-mypy
-locust
 supabase
 python-dotenv

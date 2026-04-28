@@ -44,8 +44,7 @@ jobs:
 
     - name: Install analysis tools
       run: |
-        pip install bandit safety flake8 black isort mypy
-        pip install -r backend/requirements.txt --timeout 120 || true
+        pip install -r backend/requirements-dev.txt --timeout 120 || true
 
     - name: 🔒 Security scan with Bandit
       run: bandit -r backend/ -f json -o bandit-report.json || true
@@ -95,8 +94,8 @@ jobs:
 
       - name: Install ML dependencies
         run: |
-          pip install -r backend/requirements.txt --timeout 120
-          pip install pytest pytest-cov mlflow
+          pip install -r backend/requirements-dev.txt --timeout 120
+          pip install mlflow
 
       - name: 🔬 Generate ML model
         run: |
@@ -202,8 +201,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install -r backend/requirements.txt --timeout 120
-        pip install pytest pytest-cov pytest-mock requests-mock
+        pip install -r backend/requirements-dev.txt --timeout 120
 
     - name: Generate model for testing
       run: |
@@ -217,8 +215,6 @@ jobs:
 
     - name: 🚀 API load testing
       run: |
-        pip install locust
-
         cat > locustfile.py << 'EOF'
         from locust import HttpUser, task, between
 
@@ -335,7 +331,7 @@ jobs:
 
     - name: Generate model for Docker
       run: |
-        pip install -r backend/requirements.txt --timeout 120
+        pip install -r backend/requirements-dev.txt --timeout 120
         python ml_pipeline_urban.py
 
     - name: Build Docker image
@@ -395,7 +391,7 @@ jobs:
 
     - name: 📊 Update staging metrics
       run: |
-        pip install -r backend/requirements.txt --timeout 120 -q
+        pip install -r backend/requirements-dev.txt --timeout 120 -q
         python ml_pipeline_urban.py
         python -c "
         import sys; sys.path.insert(0, '.')
@@ -450,7 +446,7 @@ jobs:
 
     - name: 📧 Notify stakeholders
       run: |
-        pip install -r backend/requirements.txt --timeout 120 -q
+        pip install -r backend/requirements-dev.txt --timeout 120 -q
         python ml_pipeline_urban.py
         python -c "
         import sys; sys.path.insert(0, '.')
