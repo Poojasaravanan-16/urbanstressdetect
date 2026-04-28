@@ -2,6 +2,8 @@ flask
 flask-cors
 joblib
 numpy
+pandas
+matplotlib
 scikit-learn
 pytest
 pytest-cov
