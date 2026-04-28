@@ -110,11 +110,10 @@ jobs:
           import sys
           sys.path.insert(0, '.')
           import ml_pipeline_urban
+          from ml_pipeline_urban import SVMClassifier, WeightedRegression, ClusteringClassifier, DecisionTreeRuleLearner, RuleBasedClassifier
           import joblib
-          import numpy as np
 
           bundle = joblib.load('best_model.pkl')
-          model = bundle['model']
           accuracy = bundle['accuracy']
 
           print(f'Model: {bundle["model_name"]}')
@@ -130,6 +129,7 @@ jobs:
           import sys
           sys.path.insert(0, '.')
           import ml_pipeline_urban
+          from ml_pipeline_urban import SVMClassifier, WeightedRegression, ClusteringClassifier, DecisionTreeRuleLearner, RuleBasedClassifier
           import joblib
           import numpy as np
 
@@ -151,6 +151,7 @@ jobs:
           import sys
           sys.path.insert(0, '.')
           import ml_pipeline_urban
+          from ml_pipeline_urban import SVMClassifier, WeightedRegression, ClusteringClassifier, DecisionTreeRuleLearner, RuleBasedClassifier
           import joblib
           import json
 
@@ -397,7 +398,9 @@ jobs:
         pip install -r backend/requirements.txt --timeout 120 -q
         python ml_pipeline_urban.py
         python -c "
+        import sys; sys.path.insert(0, '.')
         import ml_pipeline_urban
+        from ml_pipeline_urban import SVMClassifier, WeightedRegression, ClusteringClassifier, DecisionTreeRuleLearner, RuleBasedClassifier
         import joblib
         acc = joblib.load('best_model.pkl')['accuracy']
         print(f'📈 Model accuracy: {acc:.4f}')
@@ -450,7 +453,9 @@ jobs:
         pip install -r backend/requirements.txt --timeout 120 -q
         python ml_pipeline_urban.py
         python -c "
+        import sys; sys.path.insert(0, '.')
         import ml_pipeline_urban
+        from ml_pipeline_urban import SVMClassifier, WeightedRegression, ClusteringClassifier, DecisionTreeRuleLearner, RuleBasedClassifier
         import joblib
         acc = joblib.load('best_model.pkl')['accuracy']
         print(f'📊 Model accuracy: {acc:.2%}')
